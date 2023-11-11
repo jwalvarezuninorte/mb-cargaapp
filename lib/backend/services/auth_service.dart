@@ -137,9 +137,9 @@ class AuthService extends ChangeNotifier {
     }
   }
 
-  Future<UserModel> getUserDetail() async {
-    String userId = supabase.auth.currentSession!.user.id;
-    // TODO: we need to get also memberhip detail
+  Future<UserModel> getUserDetail({String? id}) async {
+    String userId = id ?? supabase.auth.currentSession!.user.id;
+
     final Map<String, dynamic> response = await supabase
         .from('users')
         .select('*, subscription:subscription_id'

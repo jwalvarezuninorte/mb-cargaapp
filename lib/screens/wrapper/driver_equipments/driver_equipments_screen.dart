@@ -136,7 +136,7 @@ class _DriverEquipmentsScreenState extends State<DriverEquipmentsScreen> {
           ),
           body: FutureBuilder(
             future: _equipmentService.equipments.isEmpty
-                ? _equipmentService.getEquipments(_userId)
+                ? _equipmentService.getUserEquipments(_userId)
                 : null,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {

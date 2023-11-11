@@ -6,6 +6,7 @@ class Equipment {
   final int capacity;
   final GlobalType type;
   final DateTime createdAt;
+  final String userId;
 
   Equipment({
     required this.id,
@@ -13,6 +14,7 @@ class Equipment {
     required this.capacity,
     required this.type,
     required this.createdAt,
+    required this.userId,
   });
 
   factory Equipment.fromJson(Map<String, dynamic> json) {
@@ -22,10 +24,13 @@ class Equipment {
       capacity: json['capacity'].round(),
       type: GlobalType.fromJson(json['type']),
       createdAt: DateTime.parse(json['created_at']),
+      userId: json['user_id'],
     );
   }
 
   static List<Equipment> getEquipments(List<dynamic> equipments) {
+    equipments =
+        equipments.where((equipment) => equipment['type'] != null).toList();
     return List<Equipment>.from(equipments.map((x) => Equipment.fromJson(x)));
   }
 }

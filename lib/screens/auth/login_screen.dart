@@ -83,9 +83,9 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final AuthService authService = Provider.of<AuthService>(context);
-
-    // _emailController.text = 'jwalvarez.98@gmail.com';
-    // _passwordController.text = '123asd456';
+    //
+    _emailController.text = 'enusa@telegmail.com';
+    _passwordController.text = 'enusa@telegmail.com';
 
     return Scaffold(
       appBar: GoBackAppBar(),

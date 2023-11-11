@@ -7,7 +7,6 @@ import 'package:cargaapp_mobile/backend/services/load_service.dart';
 import 'package:cargaapp_mobile/screens/miscellany/full_screen_process_status.dart';
 import 'package:cargaapp_mobile/screens/wrapper/driver_equipments/driver_equipments_screen.dart';
 import 'package:cargaapp_mobile/theme/app_theme.dart';
-import 'package:cargaapp_mobile/utils/date.dart';
 import 'package:cargaapp_mobile/widgets/common/bottomSheet.helper.dart';
 import 'package:cargaapp_mobile/widgets/common/common.dart';
 import 'package:flutter/material.dart';
@@ -106,6 +105,9 @@ class _HomeDataState extends State<HomeData> {
   Widget build(BuildContext context) {
     final LoadService loadService = Provider.of<LoadService>(context);
 
+    final _authService = Provider.of<AuthService>(context);
+    final bool isSubscriptionActive = _authService.user!.subscription.isActive;
+
     return FadeInUp(
       duration: const Duration(milliseconds: 200),
       child: FutureBuilder(
@@ -132,14 +134,28 @@ class _HomeDataState extends State<HomeData> {
               );
             }
 
-            return ListView.builder(
+            return ListView.separated(
+              separatorBuilder: (context, index) => SizedBox(
+                height: AppTheme.padding / 2,
+              ),
               clipBehavior: Clip.none,
-              padding: EdgeInsets.zero,
+              padding: EdgeInsets.all(AppTheme.padding / 2),
               shrinkWrap: true,
               scrollDirection: Axis.vertical,
               itemCount: loads.length,
-              itemBuilder: (context, index) => OfferLoadCard(
+              itemBuilder: (context, index) => LoadCard(
                 load: loads[index],
+                handleOnPressed: () async {
+                  final response = await loadService.handleOnPressed(
+                    context,
+                    isSubscriptionActive,
+                    loads[index],
+                  );
+
+                  if (!response) return;
+
+                  setState(() {});
+                },
               ),
             );
           }
@@ -156,193 +172,6 @@ class _HomeDataState extends State<HomeData> {
   }
 }
 
-class OfferLoadCard extends StatelessWidget {
-  const OfferLoadCard({super.key, required this.load});
-
-  final LoadModel load;
-
-  @override
-  Widget build(BuildContext context) {
-    final _authService = Provider.of<AuthService>(context);
-    final bool isSubscriptionActive = _authService.user!.subscription.isActive;
-
-    return Container(
-      padding: EdgeInsets.all(AppTheme.padding),
-      margin: EdgeInsets.all(AppTheme.padding / 2),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppTheme.defaultRadius * 2),
-        border: Border.all(color: AppTheme.dark.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(
-            color: AppTheme.dark.withOpacity(0.2),
-            spreadRadius: -6,
-            blurRadius: 20,
-            offset: Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          //   card header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                width: 200,
-                child: Text(
-                  "${load.title} (${load.presentationType.name})",
-                  style: AppTheme.lightTheme.textTheme.displayMedium,
-                  maxLines: 2,
-                ),
-              ),
-              Chip(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
-                    AppTheme.defaultRadius * 2,
-                  ),
-                ),
-                // padding: EdgeInsets.symmetric(
-                //   vertical: AppTheme.padding / 2,
-                //   horizontal: AppTheme.padding / 2,
-                // ),
-                backgroundColor: AppTheme.dark.withOpacity(0.1),
-                label: Text(
-                  "${load.weight} Kg",
-                  style: AppTheme.lightTheme.textTheme.displaySmall,
-                ),
-                // avatar: Icon(
-                //   Iconsax.weight_15,
-                //   color: AppTheme.dark,
-                // ),
-                labelPadding: EdgeInsets.all(2),
-              )
-            ],
-          ),
-          SizedBox(height: AppTheme.padding / 2),
-
-          Text(
-            "Por ${load.userName} ~ ${load.createdAt.timeAgo()}",
-            style: AppTheme.lightTheme.textTheme.bodySmall!.copyWith(
-              color: Colors.grey[600]!.withOpacity(0.6),
-            ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: AppTheme.padding / 4),
-          Text(
-            "Tipo de vehiculo: ${load.equipmentType.name}",
-            style: AppTheme.lightTheme.textTheme.headlineMedium!.copyWith(
-              color: Colors.grey[600],
-            ),
-            textAlign: TextAlign.center,
-          ),
-
-          //   card caption
-          isSubscriptionActive
-              ? Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Chip(
-                            padding: EdgeInsets.symmetric(
-                              vertical: AppTheme.padding / 2,
-                              horizontal: AppTheme.padding / 2,
-                            ),
-                            backgroundColor: AppTheme.base.withOpacity(0.8),
-                            label: Text(
-                              load.loadingDate.readable(),
-                              style: AppTheme
-                                  .lightTheme.textTheme.headlineMedium!
-                                  .copyWith(
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                        ),
-                        Icon(
-                          Icons.arrow_right_rounded,
-                          size: 26,
-                          color: AppTheme.dark,
-                        ),
-                        Expanded(
-                          child: Chip(
-                            padding: EdgeInsets.symmetric(
-                              vertical: AppTheme.padding / 2,
-                              horizontal: AppTheme.padding / 2,
-                            ),
-                            backgroundColor: AppTheme.base.withOpacity(0.8),
-                            label: Text(
-                              load.unloadingDate.readable(),
-                              style: AppTheme
-                                  .lightTheme.textTheme.headlineMedium!
-                                  .copyWith(
-                                color: Colors.grey[600],
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                              softWrap: true,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: AppTheme.padding / 2),
-                  ],
-                )
-              : Container(),
-
-          SizedBox(height: AppTheme.padding / 2),
-
-          //   card button
-          ElevatedButton(
-            style: isSubscriptionActive
-                ? null
-                : AppTheme.lightTheme.elevatedButtonTheme.style!.copyWith(
-                    backgroundColor: MaterialStatePropertyAll(AppTheme.base),
-                    foregroundColor: MaterialStatePropertyAll(AppTheme.primary),
-                  ),
-            onPressed: () {
-              isSubscriptionActive
-                  ? Navigator.of(context)
-                      .pushNamed('/offer_detail', arguments: load)
-                  : Navigator.of(context).pushNamed(
-                      '/full_screen_status',
-                      arguments: ScreenArguments(
-                        'Necesitas una membresía',
-                        'Para llevar a cabo esta acción, es\nnecesario que debas subscribirte.',
-                        Icons.lock,
-                        false,
-                        () => Navigator.of(context)
-                            .pushNamed('/membership_onboarding'),
-                        'Comprar membresía',
-                        'Regresar a la app',
-                        () => Navigator.of(context).pop(),
-                      ),
-                    );
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                !isSubscriptionActive
-                    ? Row(
-                        children: [
-                          Icon(Icons.lock),
-                          SizedBox(width: AppTheme.padding / 2),
-                        ],
-                      )
-                    : Container(),
-                Text("Ver detalles"),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
 Future<Location?> _handleSearchNavigation(BuildContext context) async {
   final response = await Navigator.of(context).pushNamed(
     '/select_location',
@@ -351,9 +180,7 @@ Future<Location?> _handleSearchNavigation(BuildContext context) async {
   return response as Location?;
 }
 
-Future showBottomSheetFilterOptions(
-  BuildContext context,
-) async {
+Future showBottomSheetFilterOptions(BuildContext context) async {
   Location? _selectedLocation;
   double _distanceInKm = 0.0;
   GlobalType? _selectedEquipment;
@@ -409,11 +236,11 @@ Future showBottomSheetFilterOptions(
               ),
               SizedBox(height: AppTheme.padding),
               SectionHeader(
-                title: "Distancia máxima",
+                title: "Capacidad máxima",
                 hasPadding: false,
                 actionLabel: _distanceInKm.round() == 0
                     ? 'Sin límites'
-                    : '${_distanceInKm.round()} Km',
+                    : '${_distanceInKm.round()} Kg',
                 onMorePressed: () {},
               ),
               SizedBox(height: AppTheme.padding / 2),

@@ -9,7 +9,6 @@ import 'package:cargaapp_mobile/widgets/base/Button.dart';
 import 'package:cargaapp_mobile/widgets/common/bottomSheet.helper.dart';
 import 'package:cargaapp_mobile/widgets/common/common.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -78,12 +77,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
               SizedBox(height: AppTheme.padding),
               _ProfileHeader(user: _user),
               SizedBox(height: AppTheme.padding),
               Divider(color: AppTheme.dark.withOpacity(0.2)),
-              Spacer(),
+              SizedBox(height: AppTheme.padding),
               if (_subscription.isActive == false)
                 EmptyContent(
                   message: 'Necesitas una suscripción\npara ver ofertas',
@@ -105,8 +105,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _showBottomSheetUserOptions(BuildContext context) {
+    final AuthService _authService = Provider.of<AuthService>(
+      context,
+      listen: false,
+    );
+
+    final bool isDriver =
+        _authService.user?.subscription.membership.price != null;
+
     return showCustomBottomSheet(
       context: context,
+      fullHeight: false,
       content: [
         SectionHeader(title: "Cuenta", hasPadding: false),
         Button(
@@ -144,17 +153,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
         SizedBox(height: AppTheme.padding * 2),
         SectionHeader(title: "Otros", hasPadding: false),
-        Button(
-          onPressed: () {},
-          label: 'Cancelar suscripción',
-          icon: Iconsax.ticket_expired,
-        ),
+        if (isDriver)
+          Button(
+            onPressed: () {},
+            label: 'Cancelar suscripción',
+            icon: Iconsax.ticket_expired,
+          ),
         Button(
           onPressed: () {},
           label: 'Eliminar cuenta',
           icon: Iconsax.ticket_expired,
           color: Colors.red,
         ),
+        SizedBox(height: AppTheme.padding * 2),
       ],
     );
   }
@@ -177,13 +188,8 @@ class _SubscriptionInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        SvgPicture.asset(
-          'assets/icons/tree_icon.svg',
-          height: 120,
-          width: 120,
-        ),
         Container(
           decoration: BoxDecoration(
             color: AppTheme.primary.withOpacity(0.1),
@@ -203,41 +209,63 @@ class _SubscriptionInfo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
+                'Membresía:',
+                style: AppTheme.lightTheme.textTheme.displayMedium!.copyWith(
+                  color: AppTheme.dark.withOpacity(0.4),
+                ),
+                textAlign: TextAlign.center,
+              ),
+              Text(
                 _subscription.membership.name,
                 style: AppTheme.lightTheme.textTheme.displayLarge,
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: AppTheme.padding / 4),
               Text(
-                '${_subscription.membership.price} ARS/mes',
+                _subscription.membership.price == null
+                    ? 'Gratis'
+                    : '${_subscription.membership.price} ARS/mes',
                 style: AppTheme.lightTheme.textTheme.displayMedium!.copyWith(
                   color: AppTheme.primary,
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: AppTheme.padding),
-              ...List.generate(
-                subscriptionAttributes.length,
-                (index) => Text(
-                  '✅ ${subscriptionAttributes[index]}',
-                  style: AppTheme.lightTheme.textTheme.headlineMedium!.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                  softWrap: true,
-                ),
-              ),
-              SizedBox(height: AppTheme.padding),
-              SectionHeader(title: 'Proximo cobro', hasPadding: false),
-              SizedBox(height: AppTheme.padding / 6),
-              Text(
-                _subscription.lastSubscription?.nextMonth().readable() ?? '',
-                style: AppTheme.lightTheme.textTheme.displaySmall!.copyWith(
-                  color: Colors.grey[600],
-                ),
-                overflow: TextOverflow.ellipsis,
-                softWrap: true,
-              ),
+              _subscription.membership.price == null
+                  ? Container()
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: AppTheme.padding),
+                        ...List.generate(
+                          subscriptionAttributes.length,
+                          (index) => Text(
+                            '✅ ${subscriptionAttributes[index]}',
+                            style: AppTheme.lightTheme.textTheme.headlineMedium!
+                                .copyWith(
+                              color: Colors.grey[600],
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            softWrap: true,
+                          ),
+                        ),
+                        SizedBox(height: AppTheme.padding),
+                        SectionHeader(
+                            title: 'Proximo cobro', hasPadding: false),
+                        SizedBox(height: AppTheme.padding / 6),
+                        Text(
+                          _subscription.lastSubscription
+                                  ?.nextMonth()
+                                  .readable() ??
+                              '',
+                          style: AppTheme.lightTheme.textTheme.displaySmall!
+                              .copyWith(
+                            color: Colors.grey[600],
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                          softWrap: true,
+                        ),
+                      ],
+                    )
             ],
           ),
         ),
@@ -257,50 +285,7 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 120,
-          height: 120,
-          decoration: BoxDecoration(
-            border: Border.all(
-              width: 2,
-              color: AppTheme.dark.withOpacity(0.3),
-              strokeAlign: BorderSide.strokeAlignOutside,
-            ),
-            color: AppTheme.dark.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Stack(
-            children: [
-              Center(
-                child: Text(
-                  '${_user.name.split(" ")[0][0]}${_user.name.split(" ")[1][0]}',
-                  style: TextStyle(
-                    fontSize: 64,
-                    color: AppTheme.dark,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: 0,
-                right: 0,
-                child: IconButton(
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppTheme.base,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  color: AppTheme.dark,
-                  onPressed: () async {
-                    await loadImageFromGallery();
-                  },
-                  icon: Icon(Iconsax.gallery_add),
-                ),
-              ),
-            ],
-          ),
-        ),
+        ProfileAvatar(userName: _user.name),
         SizedBox(width: AppTheme.padding),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

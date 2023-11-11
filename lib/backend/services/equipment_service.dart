@@ -11,6 +11,15 @@ class EquipmentService extends ChangeNotifier {
 
   List<GlobalType> _equipmentTypes = [];
 
+  Map<String, dynamic> _filters = {};
+
+  Map<String, dynamic> get filters => _filters;
+
+  set filters(Map<String, dynamic> value) {
+    _filters = value;
+    notifyListeners();
+  }
+
   List<Equipment> get equipments => _equipments;
 
   set equipments(List<Equipment> value) {
@@ -18,19 +27,38 @@ class EquipmentService extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<Equipment>> getEquipments(String userId) async {
+  validateFilter() {
+    _filters = Map.from(_filters)
+      ..removeWhere((key, value) => value == null || value == 0.0);
+    notifyListeners();
+    // setState(() {});
+  }
+
+  Future<List<Equipment>> getUserEquipments(String userId) async {
     final response = await supabase
         .from('equipments')
         .select(
-            'id, capacity, license_plate, created_at, type:equipment_type(id, name, type))')
+            'id, user_id, capacity, license_plate, created_at, type:equipment_type(id, name, type))')
         .eq('user_id', userId)
         .order('created_at');
-
-    print(response.toString());
 
     _equipments = await Equipment.getEquipments(response);
 
     return _equipments;
+  }
+
+  Future<bool> getAllEquipments() async {
+    final response = await supabase
+        .from('equipments')
+        .select(
+            'id, user_id, capacity, license_plate, created_at, type:equipment_type(id, name, type))')
+        .order('created_at');
+
+    _equipments = await Equipment.getEquipments(response);
+
+    notifyListeners();
+
+    return true;
   }
 
   Future<bool> createEquipment(Map<String, dynamic> equipmentMap) async {
@@ -59,6 +87,43 @@ class EquipmentService extends ChangeNotifier {
     );
 
     return _equipmentTypes;
+  }
+
+  Future<bool?> filterEquipments() async {
+    var response;
+    String? equipmentTypeId = _filters['vehicle_type'];
+    double? capacity = _filters['capacity'];
+
+    if (equipmentTypeId == null && capacity == null) return null;
+
+    if (equipmentTypeId != null && capacity != null) {
+      response = await supabase
+          .from('equipments')
+          .select(
+              'id, user_id, capacity, license_plate, created_at, type:equipment_type(id, name, type)')
+          .eq('type.id', equipmentTypeId)
+          .gt('capacity', capacity)
+          .order('created_at');
+    } else if (equipmentTypeId != null) {
+      response = await supabase
+          .from('equipments')
+          .select(
+              'id, user_id, capacity, license_plate, created_at, type:equipment_type(id, name, type)')
+          .eq('type.id', equipmentTypeId)
+          .order('created_at');
+    } else if (capacity != null) {
+      response = await supabase
+          .from('equipments')
+          .select(
+              'id, user_id, capacity, license_plate, created_at, type:equipment_type(id, name, type)')
+          .gt('capacity', capacity)
+          .order('created_at');
+    }
+
+    _equipments = await Equipment.getEquipments(response);
+    notifyListeners();
+
+    return true;
   }
 
   Future<List<Location>> search(String term) async {

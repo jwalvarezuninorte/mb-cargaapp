@@ -1,28 +1,36 @@
 class LoadModel {
-  final String id;
+  final String? id;
   final String title;
   final GlobalType equipmentType;
   final GlobalType presentationType;
   final double weight;
   final String userId;
-  final String userName;
-  final DateTime createdAt;
+  final String? userName;
+  final DateTime? createdAt;
   final DateTime loadingDate;
   final DateTime unloadingDate;
-  final String description;
+  final String? description;
+  final GlobalType feeType;
+  final double fee;
+  final GlobalType transactionType;
+  final int paymentDelay;
 
   LoadModel({
-    required this.id,
+    this.id,
     required this.title,
     required this.equipmentType,
     required this.presentationType,
     required this.weight,
     required this.userId,
-    required this.userName,
-    required this.createdAt,
+    this.userName,
+    this.createdAt,
     required this.loadingDate,
     required this.unloadingDate,
-    required this.description,
+    this.description,
+    required this.feeType,
+    required this.fee,
+    required this.transactionType,
+    required this.paymentDelay,
   });
 
   static List<LoadModel> getLoads(List<Map<String, dynamic>> loads) {
@@ -41,7 +49,26 @@ class LoadModel {
         loadingDate: DateTime.parse(json['loading_date']),
         unloadingDate: DateTime.parse(json['unloading_date']),
         description: json['description'],
+        feeType: GlobalType.fromJson(json['fee_type']),
+        fee: double.parse(json['fee']),
+        transactionType: GlobalType.fromJson(json['payment_type']),
+        paymentDelay: json['payment_delay'],
       );
+
+  Map<String, dynamic> toJson() => {
+        'title': title,
+        'equipment_type_id': equipmentType.id,
+        'load_presentation_type_id': presentationType.id,
+        'weight': weight,
+        'user_id': userId,
+        'loading_date': loadingDate.toIso8601String(),
+        'unloading_date': unloadingDate.toIso8601String(),
+        'description': description,
+        'fee_type_id': feeType.id,
+        'fee': fee,
+        'payment_type_id': transactionType.id,
+        'payment_delay': paymentDelay,
+      };
 }
 
 class GlobalType {

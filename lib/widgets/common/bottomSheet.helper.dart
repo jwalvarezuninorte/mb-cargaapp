@@ -5,19 +5,23 @@ import 'package:flutter/material.dart';
 Future<void> showCustomBottomSheet({
   required BuildContext context,
   required List<Widget> content,
+  CrossAxisAlignment crossAlignment = CrossAxisAlignment.start,
+  bool fullHeight = true,
 }) {
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: Colors.transparent,
+    barrierColor: Colors.black.withOpacity(0.72),
+    isDismissible: false,
     builder: (BuildContext context) {
       return Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
         child: Container(
-          height: MediaQuery.of(context).size.height * 0.8,
+          height: fullHeight ? MediaQuery.of(context).size.height * 0.9 : null,
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -28,7 +32,7 @@ Future<void> showCustomBottomSheet({
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: crossAlignment,
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               DragIndicator(),

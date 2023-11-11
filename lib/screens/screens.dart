@@ -1,3 +1,4 @@
+export 'package:cargaapp_mobile/screens/wrapper/load_giver_loads/load_giver_edit_screen.dart';
 export 'package:cargaapp_mobile/screens/auth/login_screen.dart';
 export 'package:cargaapp_mobile/screens/auth/register_screen.dart';
 export 'package:cargaapp_mobile/screens/membership/pay_membership_screen.dart';
