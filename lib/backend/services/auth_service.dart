@@ -197,4 +197,24 @@ class AuthService extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> updateUserInfo({
+    required String fullName,
+    required String phoneNumber,
+    required String dni,
+  }) async {
+    await supabase.from('users').update({
+      'name': fullName,
+      'phone_number': phoneNumber,
+      'dni': dni,
+    }).eq('id', _user!.id);
+
+    _user!.name = fullName;
+    _user!.phoneNumber = phoneNumber;
+    _user!.dni = dni;
+
+    notifyListeners();
+
+    return true;
+  }
 }

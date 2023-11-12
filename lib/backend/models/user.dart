@@ -60,9 +60,9 @@ class Membership {
 class UserModel {
   final String id;
   final String email;
-  final String name;
-  final String phoneNumber;
-  final String dni;
+  String name;
+  String phoneNumber;
+  String dni;
   Subscription subscription;
 
   String? profilePhotoURL;
