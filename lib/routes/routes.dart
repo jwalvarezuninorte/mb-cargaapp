@@ -29,5 +29,6 @@ class AppRoutes {
     '/select_location': (BuildContext context) => const SelectLocationScreen(),
     '/edit_load': (BuildContext context) => LoadGiverEditScreen(),
     '/create_load': (BuildContext context) => LoadGiverEditScreen(),
+    '/edit_profile': (BuildContext context) => EditProfileScreen(),
   };
 }
