@@ -10,7 +10,7 @@ import 'package:cargaapp_mobile/widgets/common/common.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
 class LoadGiverOffersScreen extends StatefulWidget {
   const LoadGiverOffersScreen({super.key});
@@ -100,7 +100,7 @@ class _LoadGiverOffersScreenState extends State<LoadGiverOffersScreen> {
                 _equipmentService.getAllEquipments();
               }
 
-              final response = await _equipmentService.filterEquipments();
+              await _equipmentService.filterEquipments();
             },
             icon: Icon(Iconsax.filter),
           ),
@@ -158,7 +158,10 @@ class _LoadGiverOffersScreenState extends State<LoadGiverOffersScreen> {
                             fullHeight: false,
                             crossAlignment: CrossAxisAlignment.center,
                             content: [
-                              ProfileAvatar(userName: userDetail.name),
+                              ProfileAvatar(
+                                userName: userDetail.name,
+                                imageUrl: userDetail.profilePhotoURL,
+                              ),
                               SizedBox(height: AppTheme.padding / 2),
                               Text(
                                 '${userDetail.name.split(" ")[0]} ${userDetail.name.split(" ")[1]}',
@@ -184,7 +187,7 @@ class _LoadGiverOffersScreenState extends State<LoadGiverOffersScreen> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: [
                                     IconButton(
-                                      onPressed: () => launch(
+                                      onPressed: () => launchUrlString(
                                         'sms:${userDetail.phoneNumber}',
                                       ),
                                       icon: Icon(
@@ -199,7 +202,7 @@ class _LoadGiverOffersScreenState extends State<LoadGiverOffersScreen> {
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed: () => launch(
+                                      onPressed: () => launchUrlString(
                                         'mailto:${userDetail.email}',
                                       ),
                                       icon: Icon(
@@ -214,7 +217,7 @@ class _LoadGiverOffersScreenState extends State<LoadGiverOffersScreen> {
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed: () => launch(
+                                      onPressed: () => launchUrlString(
                                         'tel://${userDetail.phoneNumber}',
                                       ),
                                       icon: Icon(Iconsax.call,
@@ -328,7 +331,6 @@ class _LoadGiverOffersScreenState extends State<LoadGiverOffersScreen> {
             },
             buttonText: 'Volver a cargar',
           );
-          ;
         },
       ),
     );

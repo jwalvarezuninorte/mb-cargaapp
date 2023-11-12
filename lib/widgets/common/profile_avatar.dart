@@ -1,4 +1,3 @@
-import 'package:cargaapp_mobile/backend/models/user.dart';
 import 'package:cargaapp_mobile/backend/services/auth_service.dart';
 import 'package:cargaapp_mobile/theme/app_theme.dart';
 import 'package:cargaapp_mobile/utils/image.dart';
@@ -11,8 +10,7 @@ class ProfileAvatar extends StatelessWidget {
   ProfileAvatar({
     super.key,
     required this.userName,
-    // TODO: put this imageUrl as required
-    this.imageUrl,
+    required this.imageUrl,
     this.showAddImageAction = false,
   });
 
