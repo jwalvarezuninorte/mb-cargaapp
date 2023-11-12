@@ -1,45 +1,61 @@
 import 'package:cargaapp_mobile/backend/models/user.dart';
+import 'package:cargaapp_mobile/backend/services/auth_service.dart';
 import 'package:cargaapp_mobile/theme/app_theme.dart';
 import 'package:cargaapp_mobile/utils/image.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:provider/provider.dart';
 
 class ProfileAvatar extends StatelessWidget {
   ProfileAvatar({
     super.key,
-    this.showAddImageAction = false,
     required this.userName,
+    // TODO: put this imageUrl as required
+    this.imageUrl,
+    this.showAddImageAction = false,
   });
 
   final String userName;
   final bool? showAddImageAction;
+  final String? imageUrl;
 
   @override
   Widget build(BuildContext context) {
+    final _authService = Provider.of<AuthService>(context);
+
     return Container(
-      width: 120,
-      height: 120,
+      width: 160,
+      height: 160,
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         border: Border.all(
           width: 2,
-          color: AppTheme.dark.withOpacity(0.3),
+          color: AppTheme.dark.withOpacity(0.2),
           strokeAlign: BorderSide.strokeAlignOutside,
         ),
         color: AppTheme.dark.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppTheme.defaultRadius),
       ),
       child: Stack(
         children: [
-          Center(
-            child: Text(
-              '${userName.split(" ")[0][0]}${userName.split(" ")[1][0]}',
-              style: TextStyle(
-                fontSize: 64,
-                color: AppTheme.dark,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
+          imageUrl == null
+              ? Center(
+                  child: Text(
+                    '${userName.split(" ")[0][0]}${userName.split(" ")[1][0]}',
+                    style: TextStyle(
+                      fontSize: 64,
+                      color: AppTheme.dark.withOpacity(0.6),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                )
+              : Image.network(
+                  imageUrl as String,
+                  fit: BoxFit.cover,
+                  width: 160,
+                  height: 160,
+                ),
           if (showAddImageAction!)
             Positioned(
               bottom: 0,
@@ -48,12 +64,21 @@ class ProfileAvatar extends StatelessWidget {
                 style: IconButton.styleFrom(
                   backgroundColor: AppTheme.base,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(AppTheme.defaultRadius),
+                    side: BorderSide(
+                      color: AppTheme.dark.withOpacity(0.1),
+                      width: 2,
+                    ),
                   ),
                 ),
                 color: AppTheme.dark,
                 onPressed: () async {
-                  await loadImageFromGallery();
+                  PlatformFile? selectedImage = await loadImageFromGallery();
+
+                  if (selectedImage != null) {
+                    await _authService.updateProfilePicture(
+                        profilePhoto: selectedImage);
+                  }
                 },
                 icon: Icon(Iconsax.gallery_add),
               ),

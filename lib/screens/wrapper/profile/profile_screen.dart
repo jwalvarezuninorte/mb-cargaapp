@@ -119,7 +119,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       content: [
         SectionHeader(title: "Cuenta", hasPadding: false),
         Button(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.of(context).pushNamed('/edit_profile');
+          },
           label: 'Editar',
           icon: Iconsax.edit,
         ),
@@ -285,7 +287,11 @@ class _ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        ProfileAvatar(userName: _user.name),
+        ProfileAvatar(
+          userName: _user.name,
+          showAddImageAction: true,
+          imageUrl: _user.profilePhotoURL,
+        ),
         SizedBox(width: AppTheme.padding),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,7 +1,7 @@
+import 'dart:io';
+
 import 'package:cargaapp_mobile/backend/models/subscription.dart';
-import 'package:cargaapp_mobile/backend/services/api.dart';
 import 'package:cargaapp_mobile/backend/services/supabase_config.dart';
-import 'package:dio/dio.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -160,24 +160,41 @@ class AuthService extends ChangeNotifier {
   Future<void> updateProfilePicture({
     required PlatformFile profilePhoto,
   }) async {
-    FormData formData = FormData.fromMap(
-      {
-        "profile_photo_user": await MultipartFile.fromFile(
-          profilePhoto.path!,
-          filename: profilePhoto.name,
-        )
-      },
-    );
+    final File avatarFile = File(profilePhoto.path as String);
 
-    final response = await dio.put('/profile_photo', data: formData);
+    String path;
 
-    if (response.statusCode == 200) {
-      // _user = UserResponse.fromMap(response.data).user;
-      notifyListeners();
+    if (_user!.profilePhotoURL == null) {
+      path = await supabase.storage.from('profile-photos').upload(
+            'avatar1.png',
+            avatarFile,
+            fileOptions: const FileOptions(
+              cacheControl: '3600',
+              upsert: false,
+            ),
+          );
+    } else {
+      path = await supabase.storage.from('profile-photos').update(
+            'avatar1.png',
+            avatarFile,
+            fileOptions: const FileOptions(
+              cacheControl: '3600',
+              upsert: false,
+            ),
+          );
     }
 
-    throw Exception(
-      'Error al actualizar la foto de perfil (${response.data["msg"]})',
-    );
+    if (path.isNotEmpty) {
+      _user!.profilePhotoURL =
+          "https://jxdroaxdrmeurapnjmdb.supabase.co/storage/v1/object/public/" +
+              path;
+      await supabase.from('users').update({
+        'photo':
+            "https://jxdroaxdrmeurapnjmdb.supabase.co/storage/v1/object/public/" +
+                path,
+      }).eq('id', _user!.id);
+
+      notifyListeners();
+    }
   }
 }

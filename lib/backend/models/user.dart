@@ -65,7 +65,7 @@ class UserModel {
   final String dni;
   Subscription subscription;
 
-  // final String profilePhotoURL;
+  String? profilePhotoURL;
 
   UserModel({
     required this.id,
@@ -73,7 +73,7 @@ class UserModel {
     required this.phoneNumber,
     required this.dni,
     required this.subscription,
-    // required this.profilePhotoURL,
+    required this.profilePhotoURL,
     required this.email,
   });
 
@@ -84,6 +84,7 @@ class UserModel {
       phoneNumber: json['phone_number'],
       dni: json['dni'],
       subscription: Subscription.fromJson(json['subscription']),
+      profilePhotoURL: json['photo'],
       email: json['email'],
     );
   }
